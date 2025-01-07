@@ -1,0 +1,83 @@
+// Create Table
+
+// Create PHP code to save to Table
+
+// Create Data Class
+
+// Create API Interface
+
+// POST Method Retrofit
+
+val progressDialog = ProgressDialog(this@PurchaseRequestDetailActivity)
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+        progressDialog.setTitle("")
+        progressDialog.setMessage("Loading..")
+        progressDialog.show()
+        progressDialog.setCancelable(false)
+
+        val postRequest = PricingUpdateRequest(
+            orderId.toString(),
+            mrp,
+            discount,
+            price,
+            gst,
+            deliveryFee,
+            platformFee,
+            totalFee,
+            user_id = userId
+        )
+
+        // Send the POST request
+        RetrofitClient.apiService.updatePricing(postRequest)
+            .enqueue(object : Callback<GeneralResponse> {
+                override fun onResponse(
+                    call: Call<GeneralResponse>,
+                    response: Response<GeneralResponse>
+                ) {
+
+                    progressDialog.dismiss()
+
+                    if (response.isSuccessful) {
+                        val postResponse = response.body()
+
+                        if (postResponse?.success == true) {
+
+                            Toast.makeText(
+                                this@PurchaseRequestDetailActivity,
+                                postResponse.message,
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            finish()
+
+                        } else {
+
+                            Toast.makeText(
+                                this@PurchaseRequestDetailActivity,
+                                postResponse?.message,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                    } else {
+
+                        Toast.makeText(
+                            this@PurchaseRequestDetailActivity,
+                            "Failed to add industrial spare",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<GeneralResponse>, t: Throwable) {
+
+                    progressDialog.dismiss()
+                    Log.e("// Retrofit", "Failure: ${t.message}")
+
+                    Toast.makeText(
+                        this@PurchaseRequestDetailActivity,
+                        "Something went wrong",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
