@@ -8,76 +8,69 @@
 
 // POST Method Retrofit
 
-val progressDialog = ProgressDialog(this@PurchaseRequestDetailActivity)
+        val progressDialog = ProgressDialog(this@AddDealersActivity)
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
         progressDialog.setTitle("")
-        progressDialog.setMessage("Loading..")
+        progressDialog.setMessage("Uploading..")
         progressDialog.show()
         progressDialog.setCancelable(false)
 
-        val postRequest = PricingUpdateRequest(
-            orderId.toString(),
-            mrp,
-            discount,
-            price,
-            gst,
-            deliveryFee,
-            platformFee,
-            totalFee,
-            user_id = userId
-        )
+        var body: MultipartBody.Part? = null
 
-        // Send the POST request
-        RetrofitClient.apiService.updatePricing(postRequest)
-            .enqueue(object : Callback<GeneralResponse> {
-                override fun onResponse(
-                    call: Call<GeneralResponse>,
-                    response: Response<GeneralResponse>
-                ) {
+        if (imageUri != null) {
 
-                    progressDialog.dismiss()
+            val file = uriToFile(imageUri!!)
+            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+            body = MultipartBody.Part.createFormData("image", file.name, requestFile)
+        }
 
-                    if (response.isSuccessful) {
-                        val postResponse = response.body()
+        val nameRequest = RequestBody.create("text/plain".toMediaTypeOrNull(), name)
+        val phoneRequest = RequestBody.create("text/plain".toMediaTypeOrNull(), phone)
+        val addressRequest = RequestBody.create("text/plain".toMediaTypeOrNull(), address)
+        val latitudeRequest =
+            RequestBody.create("text/plain".toMediaTypeOrNull(), latValue)
+        val longitudeRequest =
+            RequestBody.create("text/plain".toMediaTypeOrNull(), lonValue)
 
-                        if (postResponse?.success == true) {
+        val call =
+            RetrofitClient.apiService.uploadDealer(
+                body,
+                nameRequest,
+                phoneRequest,
+                addressRequest,
+                latitudeRequest,
+                longitudeRequest
+            )
+        call.enqueue(object : Callback<GeneralResponse> {
+            override fun onResponse(
+                call: Call<GeneralResponse>,
+                response: Response<GeneralResponse>
+            ) {
 
-                            Toast.makeText(
-                                this@PurchaseRequestDetailActivity,
-                                postResponse.message,
-                                Toast.LENGTH_SHORT
-                            ).show()
+                progressDialog.dismiss()
 
-                            finish()
-
-                        } else {
-
-                            Toast.makeText(
-                                this@PurchaseRequestDetailActivity,
-                                postResponse?.message,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-
-                    } else {
-
-                        Toast.makeText(
-                            this@PurchaseRequestDetailActivity,
-                            "Failed to add industrial spare",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-
-                override fun onFailure(call: Call<GeneralResponse>, t: Throwable) {
-
-                    progressDialog.dismiss()
-                    Log.e("// Retrofit", "Failure: ${t.message}")
-
+                if (response.isSuccessful) {
+                    println("// Upload successful: ${response.body()}")
                     Toast.makeText(
-                        this@PurchaseRequestDetailActivity,
-                        "Something went wrong",
+                        this@AddDealersActivity,
+                        "Saved successfully!",
                         Toast.LENGTH_SHORT
-                    ).show()
+                    )
+                        .show()
+
+                    setResult(Activity.RESULT_OK)
+                    finish()
+
+                } else {
+                    println("// Server error: ${response.errorBody()?.string()}")
+                    Toast.makeText(this@AddDealersActivity, "Server error", Toast.LENGTH_SHORT)
+                        .show()
                 }
-            })
+            }
+
+            override fun onFailure(call: Call<GeneralResponse>, t: Throwable) {
+                progressDialog.dismiss()
+                println("// Upload failed: ${t.message}")
+                Toast.makeText(this@AddDealersActivity, "Upload failed", Toast.LENGTH_SHORT).show()
+            }
+        })
