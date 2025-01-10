@@ -6,7 +6,7 @@
 
 // Add in Api Interface
 
-// Add the Retrofit code for GET Request / POST Request
+// Add the Retrofit code for GET Request
 
         val progressDialog = ProgressDialog(this@CarSparesActivity)
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
@@ -46,4 +46,7 @@
                     .show()
                 Log.e("Retrofit", "Request failed: ${t.message}")
             }
+
+
+// Add the Retrofit code for POST Request
         })
