@@ -2,3 +2,8 @@
 
 date_default_timezone_set("Asia/Calcutta");
 $date = date('d-m-Y h:i:s A', time());
+
+// For POST Requests
+
+$_POST = json_decode(file_get_contents('php://input') , true);
+$response = array();
