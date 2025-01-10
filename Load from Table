@@ -51,3 +51,61 @@
 
 // Add the Retrofit code for POST Request
 
+        val progressDialog = ProgressDialog(this@StoreDetailActivity)
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+        progressDialog.setTitle("")
+        progressDialog.setMessage("Loading..")
+        progressDialog.show()
+        progressDialog.setCancelable(false)
+
+        val request = ProductDetailRequest(id.toString())
+
+        val call = RetrofitClient.apiService.productDetail(request)
+
+        call.enqueue(object : Callback<ProductDetailResponse> {
+            override fun onResponse(
+                call: Call<ProductDetailResponse>,
+                response: Response<ProductDetailResponse>
+            ) {
+
+                progressDialog.dismiss()
+
+                println("// Detail response: " + response.body())
+
+                if (response.isSuccessful) {
+                    val responseBody = response.body()
+
+                    if (responseBody?.success == true) {
+
+                        val data = responseBody.data
+
+                        if (data.isNotEmpty()) {
+                            
+                            val productName = data[0].product_name
+                            
+                            println("// product name: "+productName)
+                        }
+                    }
+
+                } else {
+                    Toast.makeText(
+                        this@StoreDetailActivity,
+                        "Failed to fetch users",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    Log.e("Retrofit", "Response failed: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<ProductDetailResponse>, t: Throwable) {
+                progressDialog.dismiss()
+                Toast.makeText(
+                    this@StoreDetailActivity,
+                    "Something went wrong",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+                Log.e("Retrofit", "Request failed: ${t.message}")
+            }
+        })
