@@ -1,0 +1,22 @@
+val builder = AlertDialog.Builder(this@StoreDetailActivity)
+            builder.setMessage("Delete " + productName + "?")
+
+            // Set up the "Yes" button
+            builder.setPositiveButton("Yes") { dialog, _ ->
+                // Handle "Yes" button click
+                // You can put any action here
+
+                deleteProductApi()
+
+                dialog.dismiss()
+            }
+
+            // Set up the "No" button
+            builder.setNegativeButton("No") { dialog, _ ->
+                // Handle "No" button click
+                dialog.dismiss()
+            }
+
+            // Show the dialog
+            val dialog = builder.create()
+            dialog.show()
